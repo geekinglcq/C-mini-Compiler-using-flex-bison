@@ -44,7 +44,8 @@ main()
 		printf("\n语法分析开始....");
 		printf("\n语法树如下...\n");		
 		printTree(parseTree);		
-		ex(parseTree);
+		//打印图形化语法树 
+		//ex(parseTree);
 		yyin = (FILE *) fopen(in, "r" );
 		yyout = (FILE *) fopen(out,"w");
 		yyparse();
