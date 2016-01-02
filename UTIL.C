@@ -190,7 +190,8 @@ void printTree( TreeNode * tree)
   UNINDENT;
 }
 //��Ԫ�鹹��;
-/*void printTree( TreeNode * tree)
+
+void printFour( TreeNode * tree)
 {
   int i,count,n;
   n=0;
@@ -244,6 +245,8 @@ void printTree( TreeNode * tree)
           break;
         case AssignK:
 			count++;
+			printf("AssignKToken\n");
+			fprintf(yyout,"AssignKToken");
 			if(tree->child[0])
 			{
 				if(tree->child[0]->kind==VarDeclK||tree->child[0]->kind==CallK)
@@ -397,12 +400,13 @@ void printTree( TreeNode * tree)
           break;
     }
   for (i=0;i<MAXCHILDREN;i++)
-    printTree(tree->child[i]);
+    printFour(tree->child[i]);
   tree = tree->sibling;
   }
   N=count;
   UNINDENT;
-}*/
+}
+
 printCode()
 {
 	int count;

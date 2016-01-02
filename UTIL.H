@@ -14,6 +14,8 @@ char * copyString( char * );
 
 void printTree( TreeNode *);//打印语法树
 
+void printFour( TreeNode *);	//打印四元组
+
 extern FILE* yyout;
 
 #endif

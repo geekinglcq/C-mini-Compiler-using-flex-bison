@@ -13,11 +13,11 @@ char in[20];
 char out[20];
 main()
 {
-	char filename[20];
+	char filename[20] = "com.txt";
 	char c;	
 	printSkin();
-	printf("请输入代码文件名:");
-	scanf("%s",filename);
+	//printf("请输入代码文件名:");
+	//scanf("%s",filename);
 	strcpy(in,filename);
 	strcpy(out,filename);
 	if (strchr (in, '.') == NULL)
@@ -29,13 +29,18 @@ main()
 		char* pt = strchr (out, '.');
 		strncpy(pt,".out",4);
 	}
+    yyin = (FILE *) fopen(in, "r" );
+	if(yyin == NULL){
+		printf("代码文件 %s 打开失败:\n", in);
+		system("pause");
+		return 0;
+	}
 	printf("%s 已打开，按任意键将进行词法分析....\n",in); 
 	getchar();
 	getchar();
 	system("cls");
 	printSkin();	
 	printf("代码文件 %s 词法分析如下:\n",in);
-    yyin = (FILE *) fopen(in, "r" );
 	yyparse();
 	printf("\n词法分析完毕! 是否进行语法分析(Y/N)? ");
 	c=getchar();	
@@ -57,11 +62,7 @@ main()
 		c=getchar();
 		if(c=='Y'||c=='y')
 		{
-			if(!strcmp(in,"example.c--"))
-			{
-				printf("产生的四元式如下:\n");
-				printSYZ();
-			}			
+			printFour(parseTree);
 		}
 		else
 			exit(0);	
