@@ -62,7 +62,7 @@ main()
 		c=getchar();
 		if(c=='Y'||c=='y')
 		{
-			printFour(parseTree, '\t');
+			printFour(parseTree);
 		}
 		else
 			exit(0);	

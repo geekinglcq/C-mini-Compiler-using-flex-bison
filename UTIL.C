@@ -209,11 +209,15 @@ char* nodeStr(TreeNode* node){
         result = malloc(sizeof(char)*20);
         sprintf(result, "%s", node->attr.name);
         break;
+    case VarDeclK:
+        result = malloc(sizeof(char)*20);
+        sprintf(result, "%s %s", tokenStr(node->attr.op, ""), nodeStr(node->child[0]));
+        break;
     }
     return result;
 }
 
-void printFour( TreeNode * node, char begWith)
+void printFour( TreeNode * node)
 {
     int i,count,n,t;
     int label1, label2, label3;
@@ -227,7 +231,7 @@ void printFour( TreeNode * node, char begWith)
             //运算式, 先计算子节点, 再计算根节点
             for (i=0;i<MAXCHILDREN;i++) {
                 if(node->child[i] != NULL) {
-                    printFour(node->child[i],'\t');
+                    printFour(node->child[i]);
                 }
             }
             tempNode = node->child[1];
@@ -251,7 +255,7 @@ void printFour( TreeNode * node, char begWith)
             //赋值式, 先计算子节点, 再计算根节点
             for (i=0;i<MAXCHILDREN;i++) {
                 if(node->child[i] != NULL) {
-                    printFour(node->child[i],'\t');
+                    printFour(node->child[i]);
                 }
             }
             tempNode = node->child[1];
@@ -262,7 +266,7 @@ void printFour( TreeNode * node, char begWith)
             }
             break;
         case IfK:
-            printFour(node->child[0],'\t');
+            printFour(node->child[0]);
             label1 = ++labelCount;
             printf("\tIf %s goto L%d\n", nodeStr(node->child[0]), label1);
             if (node->child[2]) {
@@ -270,12 +274,12 @@ void printFour( TreeNode * node, char begWith)
                 printf("\telse goto L%d\n", label2);
             }
             printf("L%d:", label1);
-            printFour(node->child[1],'\t');
+            printFour(node->child[1]);
             if (node->child[2]) {
                 label3 = ++labelCount;
                 printf("\tgoto L%d\n", label3);
                 printf("L%d:", label2);
-                printFour(node->child[2],'\t');
+                printFour(node->child[2]);
                 printf("L%d:", label3);
             }
             break;
@@ -283,18 +287,18 @@ void printFour( TreeNode * node, char begWith)
             label1 = ++labelCount;
             label2 = ++labelCount;
             printf("L%d:", label1);
-            printFour(node->child[0],'\t');
+            printFour(node->child[0]);
             printf("\tIf %s goto L%d:\n", nodeStr(node->child[0]), label2);
             tempNode = node->child[1];
             tempNode = tempNode?tempNode:node->child[2];
             tempNode = tempNode?tempNode:node->child[0]->sibling;
-            printFour(tempNode,'\t');
+            printFour(tempNode);
             printf("L%d:", label2);
             break;
         case CallK:
             tempNode = node->child[1];
             while (tempNode != NULL) {
-                printFour(tempNode, '\t');
+                printFour(tempNode);
                 tempNode = tempNode->sibling;
             }
             printf("\tT%d = Call %s ", ++tempCount, nodeStr(node->child[0]));
@@ -308,10 +312,24 @@ void printFour( TreeNode * node, char begWith)
             node->attr.name = malloc(sizeof(char)*5);
             sprintf(node->attr.name, "T%d", tempCount);
             break;
+        case FunDeclK:
+            printf("\tEntry %s ( ", nodeStr(node->child[0]));
+            tempNode = node->child[1];
+            while (tempNode) {
+                printf("%s ", nodeStr(tempNode));
+                tempNode = tempNode->sibling;
+            }
+            printf(")\n");
+            printFour(node->child[2]);
+            break;
+        case ReturnK:
+            printFour(node->child[0]);
+            printf("\tReturn: %s\n", nodeStr(node->child[0]));
+            break;
         default:
             for (i=0;i<MAXCHILDREN;i++) {
                 if(node->child[i] != NULL) {
-                    printFour(node->child[i],'\t');
+                    printFour(node->child[i]);
                 }
             }
             //printf(yyout,"Unknown ExpNode kind\n");

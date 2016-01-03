@@ -14,7 +14,7 @@ char * copyString( char * );
 
 void printTree( TreeNode *);//��ӡ�﷨��
 
-void printFour(TreeNode*, char begWith);
+void printFour(TreeNode*);
 
 extern FILE* yyout;
 
