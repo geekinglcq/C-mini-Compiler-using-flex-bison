@@ -4,110 +4,115 @@
 
 /*�ú���������ӡtoken����parse�����е���scan���̣�������token
  */
+char* tokenStr(TokenType token, const char* str){
+    char* result = malloc(sizeof(char)*40);
+    switch (token) {
+        case IF:
+        case ELSE:
+        case WHILE:
+        case RETURN:
+            sprintf(result,"Reserved word: %s",str);
+            break;
+        case INT:
+      	     sprintf(result,"int");
+      	      break;
+        case VOID:
+          	  sprintf(result,"void");
+          	  break;
+        case ASSIGN:
+          	  sprintf(result,"=");
+          	  break;
+        case LT:
+          	  sprintf(result,"<");
+          	  break;
+        case GT:
+          	  sprintf(result,">");
+          	  break;
+        case EQ:
+          	  sprintf(result,"==");
+          	  break;
+        case LTEQ:
+          	  sprintf(result,"<=");
+          	  break;
+        case GTEQ:
+          	  sprintf(result,">=");
+          	  break;
+        case LPAREN:
+          	  sprintf(result,"(");
+          	  break;
+        case RPAREN:
+          	  sprintf(result,")");
+          	  break;
+        case LBRACK:
+          	  sprintf(result,"[");
+          	  break;
+        case RBRACK:
+          	  sprintf(result,"]");
+          	  break;
+        case LCURL:
+          	  sprintf(result,"{");
+          	  break;
+        case RCURL:
+          	  sprintf(result,"}");
+          	  break;
+        case SEMI:
+          	  sprintf(result,";");
+          	  break;
+        case COMMA:
+          	  sprintf(result,",");
+          	  break;
+        case PLUS:
+          	  sprintf(result,"+");
+          	  break;
+        case MINUS:
+          	  sprintf(result,"-");
+          	  break;
+        case TIMES:
+      	  sprintf(result,"*");
+      	  break;
+        case OVER:
+      	  sprintf(result,"/");
+      	  break;
+        case ENDFILE: sprintf(result,"EOF");
+      	  break;
+        case NUM:
+            sprintf(result," NUM, val= %s",str);
+            break;
+        case ID:
+      	  sprintf(result," ID, name= %s",str);
+            break;
+        case ERROR:
+      	  sprintf(result,"ERROR: %s",str);
+            break;
+        default:
+            sprintf(result,"Unknown token: %d\n",token);
+			break;
+    }
+	return result;
+}
+
 void printToken( TokenType token, const char* tokenString)
 {
-  switch (token)
-  {
-  case IF:
-  case ELSE:
-  case WHILE:
-  case RETURN:
-      fprintf(yyout,"Reserved word: %s\n",tokenString);
-      break;
-  case INT:
-	  fprintf(yyout,"int\n");
-	  break;
-  case VOID:
-	  fprintf(yyout,"void\n");
-	  break;
-  case ASSIGN:
-	  fprintf(yyout,"=\n");
-	  break;
-  case LT:
-	  fprintf(yyout,"<\n");
-	  break;
-  case GT:
-	  fprintf(yyout,">\n");
-	  break;
-  case EQ:
-	  fprintf(yyout,"==\n");
-	  break;
-  case LTEQ:
-	  fprintf(yyout,"<=\n");
-	  break;
-  case GTEQ:
-	  fprintf(yyout,">=\n");
-	  break;
-  case LPAREN:
-	  fprintf(yyout,"(\n");
-	  break;
-  case RPAREN:
-	  fprintf(yyout,")\n");
-	  break;
-  case LBRACK:
-	  fprintf(yyout,"[\n");
-	  break;
-  case RBRACK:
-	  fprintf(yyout,"]\n");
-	  break;
-  case LCURL:
-	  fprintf(yyout,"{\n");
-	  break;
-  case RCURL:
-	  fprintf(yyout,"}\n");
-	  break;
-  case SEMI:
-	  fprintf(yyout,";\n");
-	  break;
-  case COMMA:
-	  fprintf(yyout,",\n");
-	  break;
-  case PLUS:
-	  fprintf(yyout,"+\n");
-	  break;
-  case MINUS:
-	  fprintf(yyout,"-\n");
-	  break;
-  case TIMES:
-	  fprintf(yyout,"*\n");
-	  break;
-  case OVER:
-	  fprintf(yyout,"/\n");
-	  break;
-  case ENDFILE: fprintf(yyout,"EOF\n");
-	  break;
-  case NUM:
-      fprintf(yyout," NUM, val= %s\n",tokenString);
-      break;
-  case ID:
-	  fprintf(yyout," ID, name= %s\n",tokenString);
-      break;
-  case ERROR:
-	  fprintf(yyout,"ERROR: %s\n",tokenString);
-      break;
-  default:
-      fprintf(yyout,"Unknown token: %d\n",token);
-  }
+    fprintf(yyout, "%s\n", tokenStr(token, tokenString));
 }
 
 /*�����﷨���½���
  */
 
-TreeNode * newNode(NodeKind kind)
-{ TreeNode * t = (TreeNode *) malloc(sizeof(TreeNode));
-  int i;
-  if (t==NULL)
-  {
-    fprintf(yyout,"Out of memory error at line %d\n",lineno);
-  }
-  else
-  {
-    for (i=0;i<MAXCHILDREN;i++) t->child[i] = NULL;
-    t->sibling = NULL;
-    t->kind = kind;
-    t->lineno = lineno;
-  }
-  return t;
+TreeNode * newNode(NodeKind kind) {
+    TreeNode * t = (TreeNode *) malloc(sizeof(TreeNode));
+    int i;
+    if (t==NULL) {
+      fprintf(yyout,"Out of memory error at line %d\n",lineno);
+    }
+    else {
+      for (i=0; i<MAXCHILDREN; i++)
+        t->child[i] = NULL;
+      t->sibling = NULL;
+      t->kind = kind;
+      t->lineno = lineno;
+    }
+    return t;
 }
 
 /*
@@ -125,7 +130,9 @@ char * copyString(char * s)
 }
 
 
-static indentno = 0;
+static unsigned indentno = 0;
+static unsigned tempCount = 0;
+static unsigned labelCount = 0;
 
 /* macros to increase/decrease indentation */
 #define INDENT indentno+=2
@@ -163,7 +170,7 @@ void printTree( TreeNode * tree)
           break;
         case VarDeclK:
           fprintf(yyout,"Var Decl: ");
-	        printToken(tree->attr.op,'\0');
+	       printToken(tree->attr.op,'\0');
           break;
         case FunDeclK:
           fprintf(yyout,"Fun Decl: ");
@@ -183,228 +190,136 @@ void printTree( TreeNode * tree)
           fprintf(yyout,"Unknown ExpNode kind\n");
           break;
     }
-  for (i=0;i<MAXCHILDREN;i++)
-    printTree(tree->child[i]);
+	for (i=0;i<MAXCHILDREN;i++)
+		printTree(tree->child[i]);
   tree = tree->sibling;
   }
   UNINDENT;
 }
 //��Ԫ�鹹��;
 
-void printFour( TreeNode * tree)
-{
-  int i,count,n;
-  n=0;
-  count=-1;
-  INDENT;
-  while (tree != NULL) {
-    printSpaces();
-    switch (tree->kind) {
-        case IfK:
-			count++;
-			if(tree->child[0])
-			{
-				if(tree->child[0]->kind==IdK||tree->child[0]->kind==CallK)
-				{
-					SYZ[count].type1=0;
-					strcpy(SYZ[count].op1,tree->child[0]->attr.name);
-				}
-				else
-				{
-					SYZ[count].type1=1;
-					SYZ[count].o1=tree->child[0]->attr.val;
-				}
-			}
-			SYZ[count].type2=0;
-			strcpy(SYZ[count].operation,"zht");
-			strcpy(SYZ[count].op2,"\0");
-			SYZ[count].result_no=n+2;
-			n++;
-			fprintf(yyout,"If\n");
-			break;
-        case WhileK:
-			count++;
-			if(tree->child[0])
-			{
-				if(tree->child[0]->kind==IdK||tree->child[0]->kind==CallK)
-				{
-					SYZ[count].type1=0;
-					strcpy(SYZ[count].op1,tree->child[0]->attr.name);
-				}
-				else
-				{
-					SYZ[count].type1=1;
-					SYZ[count].o1=tree->child[0]->attr.val;
-				}
-			}
-			SYZ[count].type2=0;
-			strcpy(SYZ[count].op2,"\0");
-			strcpy(SYZ[count].operation,"zht");
-			SYZ[count].result_no=n+2;
-          fprintf(yyout,"While\n");
-          break;
-        case AssignK:
-			count++;
-			printf("AssignKToken\n");
-			fprintf(yyout,"AssignKToken");
-			if(tree->child[0])
-			{
-				if(tree->child[0]->kind==VarDeclK||tree->child[0]->kind==CallK)
-				{
-					SYZ[count].type1=0;
-					strcpy(SYZ[count].op1,tree->child[0]->attr.name);
-				}
-				else
-				{
-					SYZ[count].type1=1;
-					SYZ[count].o1=tree->child[0]->attr.val;
-				}
-			}
-			SYZ[count].result_no=count;
-			fprintf(yyout,"Assign to: \n",tree->attr.name);
-			break;
-        case ReturnK:
-			count++;
-			if(tree->child[0])
-			{
-				if(tree->child[0]->kind==IdK||tree->child[0]->kind==CallK)
-				{
-					SYZ[count].type1=0;
-					strcpy(SYZ[count].op1,tree->child[0]->attr.name);
-				}
-				else
-				{
-					SYZ[count].type1=1;
-					SYZ[count].o1=tree->child[0]->attr.val;
-				}
-			}
-			SYZ[count].result_no=count;
-          fprintf(yyout,"Return: \n",tree->attr.name);
-          break;
-        case CallK:
-			count++;
-			if(tree->child[0])
-			{
-				if(tree->child[0]->kind==IdK||tree->child[0]->kind==CallK)
-				{
-					SYZ[count].type1=0;
-					strcpy(SYZ[count].op1,tree->child[0]->attr.name);
-				}
-				else
-				{
-					SYZ[count].type1=1;
-					SYZ[count].o1=tree->child[0]->attr.val;
-				}
-			}
-			SYZ[count].result_no=count;
-          fprintf(yyout,"Call: \n",tree->attr.name);
-          break;
-        case VarDeclK:
-			count++;
-			if(tree->child[0])
-			{
-				if(tree->child[0]->kind==IdK||tree->child[0]->kind==CallK)
-				{
-					SYZ[count].type1=0;
-					strcpy(SYZ[count].op1,tree->child[0]->attr.name);
-				}
-				else
-				{
-					SYZ[count].type1=1;
-					SYZ[count].o1=tree->child[0]->attr.val;
-				}
-			}
-			SYZ[count].result_no=count;
-          fprintf(yyout,"Var Decl: ");
-		  printToken(tree->attr.op,'\0');
-          break;
-        case FunDeclK:	count++;
-			if(tree->child[0])
-			{
-				if(tree->child[0]->kind==IdK||tree->child[0]->kind==CallK)
-				{
-					SYZ[count].type1=0;
-					strcpy(SYZ[count].op1,tree->child[0]->attr.name);
-				}
-				else
-				{
-					SYZ[count].type1=1;
-					SYZ[count].o1=tree->child[0]->attr.val;
-				}
-			}
-
-			SYZ[count].result_no=count;
-          fprintf(yyout,"Fun Decl: ");
-		  printToken(tree->attr.op,'\0');
-          break;
-        case OpK:
-			count++;
-			if(tree->child[0])
-			{
-				if(tree->child[0]->kind==IdK||tree->child[0]->kind==CallK)
-				{
-					SYZ[count].type1=0;
-					strcpy(SYZ[count].op1,tree->child[0]->attr.name);
-				}
-				else
-				{
-					SYZ[count].type1=1;
-					SYZ[count].o1=tree->child[0]->attr.val;
-				}
-			}
-
-			SYZ[count].result_no=count;
-          fprintf(yyout,"Op: ");
-          printToken(tree->attr.op,"\0");
-          break;
-        case ConstK:
-			count++;
-			if(tree->child[0])
-			{
-				if(tree->child[0]->kind==IdK||tree->child[0]->kind==CallK)
-				{
-					SYZ[count].type1=0;
-					strcpy(SYZ[count].op1,tree->child[0]->attr.name);
-				}
-				else
-				{
-					SYZ[count].type1=1;
-					SYZ[count].o1=tree->child[0]->attr.val;
-				}
-			}
-
-			SYZ[count].result_no=count;
-          fprintf(yyout,"Const: %d\n",tree->attr.val);
-          break;
-        case IdK:
-			count++;
-			if(tree->child[0])
-			{
-				if(tree->child[0]->kind==IdK||tree->child[0]->kind==CallK)
-				{
-					SYZ[count].type1=0;
-					strcpy(SYZ[count].op1,tree->child[0]->attr.name);
-				}
-				else
-				{
-					SYZ[count].type1=1;
-					SYZ[count].o1=tree->child[0]->attr.val;
-				}
-			}
-
-			SYZ[count].result_no=count;
-          fprintf(yyout,"Id: %s\n",tree->attr.name);
-          break;
-        default:
-          fprintf(yyout,"Unknown ExpNode kind\n");
-          break;
+char* nodeStr(TreeNode* node){
+    char* result = NULL;
+    switch (node->kind) {
+    case ConstK:
+        result = malloc(sizeof(char)*10);
+        sprintf(result, "%d", node->attr.val);
+        break;
+    case IdK:
+        result = malloc(sizeof(char)*20);
+        sprintf(result, "%s", node->attr.name);
+        break;
     }
-  for (i=0;i<MAXCHILDREN;i++)
-    printFour(tree->child[i]);
-  tree = tree->sibling;
+    return result;
+}
+
+void printFour( TreeNode * node, char begWith)
+{
+    int i,count,n,t;
+    int label1, label2, label3;
+    TreeNode* tempNode = NULL;
+    n=0;
+    count=-1;
+    while (node != NULL) {
+        printSpaces();
+        switch (node->kind) {
+        case OpK:
+            //运算式, 先计算子节点, 再计算根节点
+            for (i=0;i<MAXCHILDREN;i++) {
+                if(node->child[i] != NULL) {
+                    printFour(node->child[i],'\t');
+                }
+            }
+            tempNode = node->child[1];
+            tempNode = tempNode?tempNode:node->child[2];
+            tempNode = tempNode?tempNode:node->child[0]->sibling;
+            if (tempNode) {
+                printf("\tT%d = %s %s %s\n", ++tempCount, nodeStr(node->child[0]), tokenStr(node->attr.op, ""), nodeStr(tempNode));
+                node->kind = IdK;
+                for (i=0; i<MAXCHILDREN; ++i) {
+                    //free(node->child[i]);
+                    node->child[i] = NULL;
+                }
+				node->attr.name = malloc(sizeof(char)*5);
+                sprintf(node->attr.name, "T%d", tempCount);
+            }
+            else {
+                printf("Not enough operation number: %s %s\n", nodeStr(node->child[0]), tokenStr(node->attr.op,""));
+            }
+            break;
+        case AssignK:
+            //赋值式, 先计算子节点, 再计算根节点
+            for (i=0;i<MAXCHILDREN;i++) {
+                if(node->child[i] != NULL) {
+                    printFour(node->child[i],'\t');
+                }
+            }
+            tempNode = node->child[1];
+            tempNode = tempNode?tempNode:node->child[2];
+            tempNode = tempNode?tempNode:node->child[0]->sibling;
+            if (tempNode) {
+                printf("\t%s = %s\n", nodeStr(node->child[0]), nodeStr(tempNode));
+            }
+            break;
+        case IfK:
+            printFour(node->child[0],'\t');
+            label1 = ++labelCount;
+            printf("\tIf %s goto L%d\n", nodeStr(node->child[0]), label1);
+            if (node->child[2]) {
+                label2 = ++labelCount;
+                printf("\telse goto L%d\n", label2);
+            }
+            printf("L%d:", label1);
+            printFour(node->child[1],'\t');
+            if (node->child[2]) {
+                label3 = ++labelCount;
+                printf("\tgoto L%d\n", label3);
+                printf("L%d:", label2);
+                printFour(node->child[2],'\t');
+                printf("L%d:", label3);
+            }
+            break;
+        case WhileK:
+            label1 = ++labelCount;
+            label2 = ++labelCount;
+            printf("L%d:", label1);
+            printFour(node->child[0],'\t');
+            printf("\tIf %s goto L%d:\n", nodeStr(node->child[0]), label2);
+            tempNode = node->child[1];
+            tempNode = tempNode?tempNode:node->child[2];
+            tempNode = tempNode?tempNode:node->child[0]->sibling;
+            printFour(tempNode,'\t');
+            printf("L%d:", label2);
+            break;
+        case CallK:
+            tempNode = node->child[1];
+            while (tempNode != NULL) {
+                printFour(tempNode, '\t');
+                tempNode = tempNode->sibling;
+            }
+            printf("\tT%d = Call %s ", ++tempCount, nodeStr(node->child[0]));
+            tempNode = node->child[1];
+            while (tempNode != NULL) {
+                printf("%s ", nodeStr(tempNode));
+                tempNode = tempNode->sibling;
+            }
+            printf("\n");
+            node->kind = IdK;
+            node->attr.name = malloc(sizeof(char)*5);
+            sprintf(node->attr.name, "T%d", tempCount);
+            break;
+        default:
+            for (i=0;i<MAXCHILDREN;i++) {
+                if(node->child[i] != NULL) {
+                    printFour(node->child[i],'\t');
+                }
+            }
+            //printf(yyout,"Unknown ExpNode kind\n");
+            break;
+        }
+        node = node->sibling;
   }
   N=count;
-  UNINDENT;
 }
 
 printCode()

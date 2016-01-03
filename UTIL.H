@@ -4,17 +4,17 @@
 #ifndef _UTIL_H_
 #define _UTIL_H_
 
- 
-void printToken( TokenType, const char*);//定义打印token函数
 
-TreeNode * newNode(NodeKind kind);       //这函数用来申请开辟语法树结点
+void printToken( TokenType, const char*);//锟斤拷锟斤拷锟斤拷印token锟斤拷锟斤拷
+
+TreeNode * newNode(NodeKind kind);       //锟解函锟斤拷锟斤拷锟斤拷锟斤拷锟诫开锟斤拷锟斤法锟斤拷锟斤拷锟斤拷
 
 
 char * copyString( char * );
 
-void printTree( TreeNode *);//打印语法树
+void printTree( TreeNode *);//锟斤拷印锟斤法锟斤拷
 
-void printFour( TreeNode *);	//打印四元组
+void printFour(TreeNode*, char begWith);
 
 extern FILE* yyout;
 

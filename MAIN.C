@@ -13,7 +13,7 @@ char in[20];
 char out[20];
 main()
 {
-	char filename[20] = "com.txt";
+	char filename[20] = "function.txt";
 	char c;	
 	printSkin();
 	//printf("请输入代码文件名:");
@@ -62,7 +62,7 @@ main()
 		c=getchar();
 		if(c=='Y'||c=='y')
 		{
-			printFour(parseTree);
+			printFour(parseTree, '\t');
 		}
 		else
 			exit(0);	
