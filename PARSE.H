@@ -70,16 +70,14 @@
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 40 "cminus.y"
+#line 40 "cmini.y"
 typedef union YYSTYPE { TreeNode * tnode;
          TokenType tok; } YYSTYPE;
 /* Line 1248 of yacc.c.  */
-#line 101 "cminus.tab.h"
+#line 101 "cmini.tab.h"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
 #endif
 
 extern YYSTYPE yylval;
-
-

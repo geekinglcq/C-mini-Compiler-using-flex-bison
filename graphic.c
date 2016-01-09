@@ -6,39 +6,48 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "GLOBALS.H"
+#include "publicvar.h"
 //#include "y.tab.h"
 
-int del = 1; /* distance of graph columns */
-int eps = 3; /* distance of graph lines */
-char graph[100][100]; /* 图形化矩阵 */
+int del = 1; /* 图形参数 */
+int eps = 3; /* 图形参数 */
+#define lmax 200
+#define cmax 200
+
+char graph[lmax][cmax];
+int graphNumber = 0; /* 图形化矩阵 */
 /* interface for drawing (can be replaced by "real" graphic using GD or other) */
 void graphInit (void);
 void graphFinish();
 void graphBox (char *s, int *w, int *h);
 void graphDrawBox (char *s, int c, int l);
 void graphDrawArrow (int c1, int l1, int c2, int l2);
-
+void graphTest(int l,int c);
 void exNode (TreeNode *p, int c, int l, int *ce, int *cm);
 
 /*****************************************************************************/
 
 /* main entry point of the manipulation of the syntax tree */
 int ex (TreeNode *p) {
-    int rte, rtm;
+    int rte, rtm,cs;
 
     graphInit ();
 
     exNode (p, 0, 0, &rte, &rtm);
+    while(p->sibling)
+    { cs=rte;
+      exNode(p->sibling,cs,0,&rte,&rtm);
+      p=p->sibling;
+    }
     graphFinish();
     return 0;
 }
 
-/*c----cm---ce---->                       drawing of leaf-nodes
+/*c----cm---ce---->                       绘制叶子结点
  l leaf-info
  */
 
-/*c---------------cm--------------ce----> drawing of non-leaf-nodes
+/*c---------------cm--------------ce----> 绘制非叶子结点
  l            node-info
  *                |
  *    -------------     ...----
@@ -50,28 +59,24 @@ int ex (TreeNode *p) {
  *
  */
 
-/*void exNode(
-		TreeNode *p
-        int c, int l,        /* start column and line of node
-        int *ce, int *cm     /* resulting end column and mid of node
-    )*/
-/* recursive drawing of the syntax tree */
-void exNode (TreeNode *p, int c, int l, int *ce, int *cm)
+
+/* 处理某节点 */
+void exNode (TreeNode *p, int c, int l, int *ce, int *cm)/*c 列起点， l 行起点，ce 子节点列终点，che 子节点列中点*/
 {
 
     int w, h;           /* 节点宽度和高度*/
     /*节点的文本 */
 	  char *s;
     int cbar;           /* 节点横向的起点 */
-    int k,ks;              /* 用于计数儿子&兄弟的数量 */
+    int k;              /* 用于计数儿子&兄弟的数量 */
     int che, chm;       /* 横向终点和子树的中点*/
     int cs;             /* 子树起点  */
-    int ji;
-    char word[20];      /* extended node text */
+    //int ji;
+    char word[20];      /* 方便测试 */
 
     if (!p) return;
 
-    strcpy (word, "???"); /* should never appear */
+    strcpy (word, "???"); /* 测试用 */
     s = word;
     printf("%d ",p->kind);
     switch(p->kind) {
@@ -127,90 +132,139 @@ void exNode (TreeNode *p, int c, int l, int *ce, int *cm)
         return;
     }
 
-    //for (ji = 0; ji <= 30; ji++) printf ("\n%s", graph[ji]);
-    //graphFinish();
     /* 有子女的节点 */
     cs = c;
-  /*  for (k = 0; k < p->opr.nops; k++) {
-        exNode (p->opr.op[k], cs, l+h+eps, &che, chm);
-        cs = che;
-    }*/
-    k=0;
-    ks=0;
+
     printf("%s\n",s);
-    while(p->child[k]!=NULL)
+    switch (p->kind)
     {
-      exNode(p->child[k],cs,l+h+eps,&che,&chm);
-     /* if(p->child[k]->sibling!=NULL)
-      {
-        exNode(p->child[k]->sibling,cs,l+h+eps,&che,&chm);
-        cs=che;
-        ks++;
-      }*/
-      printf("%d",k);
-      cs=che;
-      k++;
-    }
-    /* 节点 总宽度 */
-    if (w < che - c) {
-        cbar += (che - c - w) / 2;
-        *ce = che;
-        *cm = (c + che) / 2;
-    }
+      case OpK:
+        switch (p->attr.op){
+          case 269:
+          case 270:
+          case 271:
+          case 272:
+          case 273:
+          case 274:
+          case 275:
+          case 276:
+          case 277:
+          case 278: cs=c;
 
-    /* 绘制该节点 */
-    graphDrawBox (s, cbar, l);
+                    for(k=0;k<3;k++){
+                    if(p->child[k]!=NULL){
+                        exNode (p->child[k], cs, l+h+eps, &che, &chm);
+                        printf("child- %s,%d,%d\n",s,cs,l+h+eps);
 
-    /* draw arrows (not optimal: children are drawn a second time) */
-    cs = c;
-    k=0;
-    while(p->child[k]){
-        exNode (p->child[k], cs, l+h+eps, &che, &chm);
-        graphDrawArrow (*cm, l+h, chm, l+h+eps-1);
-        cs = che;
-	/*	if(p->child[k]->sibling!=NULL)
-      {
-        exNode(p->child[k]->sibling,cs,l+h+eps,&che,&chm);
-        graphDrawArrow (*cm, l+h, chm, l+h+eps-1);
-        cs=che;
+                        cs = che;
+                    }
+                  }
+                    /* 节点 总宽度 */
+                    if (w < che - c) {
+                        cbar += (che - c - w) / 2;
+                        *ce = che;
+                        *cm = (c + che) / 2;
+                    }
+                    /* 绘制该节点 */
+                    graphDrawBox (s, cbar, l);
+                    cs = c;
+                    for(k=0;k<3;k++){
+                    if(p->child[k]!=NULL){
+                        exNode (p->child[k], cs, l+h+eps, &che, &chm);
+                        printf("child- %s,%d,%d\n",s,cs,l+h+eps);
+                        graphDrawArrow (*cm, l+h, chm, l+h+eps-1);
+                        cs = che;
+                    }
+                  }
+                  /*  exNode(p->child[0],cs,l+h+eps,&che,&chm);
+                    graphDrawArrow (*cm, l+h, chm, l+h+eps-1);
+                    cs = che;
+                //    exNode (p->child[2], cs, l+h+eps, &che, &chm);
+                    graphDrawArrow (*cm, l+h, chm, l+h+eps-1);
+                    cs = che;*/
+                    break;
+          default: break;
+        };break;
+      default:
+      for(k=0;k<3;k++){
+      if(p->child[k]!=NULL)
+          {
+            exNode(p->child[k],cs,l+h+eps,&che,&chm);
+            printf("child+ %s,%d,%d\n",s,cs,l+h+eps);
+            cs=che;
+            k++;
+          }
+        }
+        for(k=0;k<3;k++)
+        {
+          if(p->child[k]!=NULL)
+          if(p->child[k]->sibling!=NULL)
+          {
+            exNode(p->child[k]->sibling,cs,l+h+eps,&che,&chm);
+            printf("child * %s,%d,%d\n",s,cs,l+h+eps);
+            cs=che;
+          }
+        }
+          /* 节点 总宽度 */
+          if (w < che - c) {
+              cbar += (che - c - w) / 2;
+              *ce = che;
+              *cm = (c + che) / 2;
+          }
 
-      }*/
-        k++;
-    }
-    	if(p->sibling!=NULL)
-      {
-        exNode(p->sibling,cs,l+h+eps,&che,&chm);
-        //graphDrawArrow (*cm, l+h, chm, l+h+eps-1);
-        cs=che;
+          /* 绘制该节点 */
+          graphDrawBox (s, cbar, l);
 
+          /*绘制箭头*/
+          cs = c;
+          for(k=0;k<3;k++){
+          if(p->child[k]){
+              exNode (p->child[k], cs, l+h+eps, &che, &chm);
+              printf("child= %s,%d,%d\n",s,cs,l+h+eps);
+              graphDrawArrow (*cm, l+h, chm, l+h+eps-1);
+              cs = che;
+          }
+        }
+        for(k=0;k<3;k++)
+        {
+        if(p->child[k]!=NULL)
+        if(p->child[k]->sibling!=NULL)
+        {
+          exNode(p->child[k]->sibling,cs,l+h+eps,&che,&chm);
+          printf("sibling %s,%d,%d\n",s,cs,l+h+eps);
+          graphDrawArrow (*cm, l+h, chm, l+h+eps-1);
+          printf("%d",k);
+          cs=che;
+        }
       }
+          break;
+
+
+
+}
 }
 
 /* 画图接口 */
 
-#define lmax 100
-#define cmax 100
+//测试是否超出图画
 
-
-int graphNumber = 0;
-/*测试是否超出图画*/
 void graphTest (int l, int c)
 {   int ok;
     ok = 1;
     if (l < 0) ok = 0;
-    if (l >= lmax) ok = 0;
+    if (l >= 200) ok = 0;
     if (c < 0) ok = 0;
-    if (c >= cmax) ok = 0;
+    if (c >= 200) ok = 0;
     if (ok) return;
     printf ("\n+++error: l=%d, c=%d not in drawing rectangle 0, 0 ... %d, %d",
-        l, c, lmax, cmax);
-    exit(1);
+        l, c, 200, 200);
+    //exit(1);
 }
 
 void graphInit (void) {
     int i, j;
-    for (i = 0; i < lmax; i++) {
-        for (j = 0; j < cmax; j++) {
+    for (i = 0; i < 200; i++) {
+        for (j = 0; j < 200; j++) {
             graph[i][j] = ' ';
         }
     }
@@ -225,7 +279,7 @@ void graphFinish() {
         if (graph[i][j] == ' ') graph[i][j] = 0;
     }
     for (i = lmax-1; i > 0 && graph[i][0] == 0; i--);
-    printf ("\n\nGraph %d:\n", graphNumber++);
+    printf ("\n\nGraph \n");
     for (j = 0; j <= i; j++) printf ("\n%s", graph[j]);
     printf("\n");
 }
@@ -237,6 +291,7 @@ void graphBox (char *s, int *w, int *h) {
 
 void graphDrawBox (char *s, int c, int l) {
     int i;
+  //  printf(",.,%s,%d,%d\n",s,c,l);
     graphTest (l, c+strlen(s)-1+del);
     for (i = 0; i < strlen (s); i++) {
         graph[l][c+i+del] = s[i];

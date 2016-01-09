@@ -1,8 +1,8 @@
-//主函数；
+//锟斤拷锟斤拷锟斤拷锟斤拷
 
-#include "globals.h"
-#include "symtab.h"
-#include "print.h"
+#include "publicvar.h"
+#include "symboltab.h"
+
 extern FILE * yyin;
 extern FILE * yyout;
 extern void yyparse();
@@ -13,15 +13,15 @@ char in[20];
 char out[20];
 main()
 {
-	char filename[20] = "function.txt";
-	char c;	
+	char filename[20] = "a.txt";
+	char c;
 	printSkin();
-	//printf("请输入代码文件名:");
-	//scanf("%s",filename);
+	//printf("输入文件名吧:");
+	//lexerf("%s",filename);
 	strcpy(in,filename);
 	strcpy(out,filename);
 	if (strchr (in, '.') == NULL)
-		strcat(in,".c--");
+		strcat(in,".cmn");
 	if (strchr (out, '.') == NULL)
 		strcat(out,".cout");
 	else
@@ -31,55 +31,48 @@ main()
 	}
     yyin = (FILE *) fopen(in, "r" );
 	if(yyin == NULL){
-		printf("代码文件 %s 打开失败:\n", in);
+		printf("啊哦，有点错哦%s :\n", in);
 		system("pause");
 		return 0;
 	}
-	printf("%s 已打开，按任意键将进行词法分析....\n",in); 
+	printf("%s 文件打开了呢，继续吧？",in);
 	getchar();
 	getchar();
 	system("cls");
-	printSkin();	
-	printf("代码文件 %s 词法分析如下:\n",in);
+	printSkin();
+	printf("这个代码，→%s 的词法就是这样的:\n",in);
 	yyparse();
-	printf("\n词法分析完毕! 是否进行语法分析(Y/N)? ");
-	c=getchar();	
+	printf("\n输入Y就继续语法分析了呢(Y/N)? ");
+	c=getchar();
 	if(c=='Y'||c=='y')
-	{  
-		printf("\n语法分析开始....");
-		printf("\n语法树如下...\n");		
-		printTree(parseTree);		
-		//打印图形化语法树 
-		//ex(parseTree);
+	{
+		printf("\n那么语法分析开始了哦");
+		printf("\n这就是语法树\n");
+		printTree(parseTree);
+		
+		ex(parseTree);
 		yyin = (FILE *) fopen(in, "r" );
 		yyout = (FILE *) fopen(out,"w");
 		yyparse();
-		printTree(parseTree);     
-		printf("\n");  	
+		printTree(parseTree);
+		printf("\n");
 		getchar();
-		printf("语法分析结束!\n");
-		printf("是否打印四元式(Y/N)? ");
+		printf("语法结束了\n");
+		printf("要不要看看四元式呢？(Y/N)? ");
 		c=getchar();
 		if(c=='Y'||c=='y')
 		{
 			printFour(parseTree);
 		}
 		else
-			exit(0);	
+			exit(0);
 	}
 	else
-		exit(0);	
+		exit(0);
 }
 void printSkin()
 {
+	printf("=======================( ??ω?)ノ??===================================\n");
+	printf("                      C-mini\n");
 	printf("================================================================\n");
-	printf("                      欢迎使用 C-MINUS!\n");printTime();
-	printf("================================================================\n");
-}
-void printTime( )
-{
-	time_t T;  
-	struct tm  *TimeNow;
-	time(&T);TimeNow=localtime(&T);
-	printf("                        %d年%d月%d日\n",1900+TimeNow->tm_year,1+(TimeNow->tm_mon),TimeNow->tm_mday);
 }
